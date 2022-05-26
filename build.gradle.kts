@@ -3,11 +3,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	id("org.springframework.boot") version "2.6.7"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
+	id ("org.jetbrains.kotlin.plugin.noarg") version "1.6.21"
 	kotlin("jvm") version "1.6.21"
 	kotlin("plugin.spring") version "1.6.21"
 	kotlin("plugin.serialization") version "1.6.10"
 	kotlin("plugin.allopen") version "1.4.32"
 }
+
+noArg {
+	annotation("javax.persistence.Entity")
+}
+
 //https://spring.io/guides/tutorials/spring-boot-kotlin/
 allOpen {
 	annotation("javax.persistence.Entity")

@@ -11,18 +11,18 @@ import javax.persistence.Table
 @kotlinx.serialization.Serializable
 data class KMBStop(
     @Column(name = "lat")
-    val lat: String,
-    @Column(name="long")
-    val long: String,
+    var lat: String,
+    @Column(name="`long`")
+    var long: String,
     @Column(name = "name_en")
     @SerialName("name_en")
-    val nameEn: String,
+    var nameEn: String,
     @Column(name="name_sc")
     @SerialName("name_sc")
-    val nameSc: String,
+    var nameSc: String,
     @Column(name="name_tc")
     @SerialName("name_tc")
-    val nameTc: String,
+    var nameTc: String,
     @Id
-    val stop: String
+    var stop: String
 )

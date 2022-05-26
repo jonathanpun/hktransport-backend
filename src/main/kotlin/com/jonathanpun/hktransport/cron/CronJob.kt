@@ -22,6 +22,7 @@ class CronJob:CommandLineRunner {
             val stops = kmbRepository.getAllStops()!!
             print("stop----")
             stopsRepository.saveAll(stops)
+            System.exit(0)
         }
 
     }
