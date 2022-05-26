@@ -24,4 +24,11 @@ class KMBRepository {
             .retrieve()
             .awaitBodyOrNull<KMBGenericResponse<KMBStop>>()?.data
     }
+
+    suspend fun getStopEta(stopId:String):List<KMBStopETA>?{
+        return webClient.get().uri("/v1/transport/kmb/stop-eta/${stopId}")
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .awaitBodyOrNull<KMBGenericResponse<KMBStopETA>>()?.data
+    }
 }
