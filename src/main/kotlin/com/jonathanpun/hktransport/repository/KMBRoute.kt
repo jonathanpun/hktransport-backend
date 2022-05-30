@@ -3,21 +3,25 @@ package com.jonathanpun.hktransport.repository
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import javax.persistence.Column
+import javax.persistence.Embeddable
+import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.IdClass
 import javax.persistence.Table
 
 
 @Entity
 @Table(name = "route")
 @Serializable
+@IdClass(KMBRouteId::class)
 data class KMBRoute(
     @Id
     val route:String,
-    @Column(name="bound")
+    @Id
     @SerialName("bound")
     val bound: String,
-    @Column(name="service_type")
+    @Id
     @SerialName("service_type")
     val serviceType:String,
     @SerialName("orig_en")
@@ -39,3 +43,10 @@ data class KMBRoute(
     @Column(name="dest_sc")
     val destSc:String,
 )
+@Embeddable
+@Serializable
+data class KMBRouteId(
+    val route:String,
+    val bound: String,
+    val serviceType:String,
+    ):java.io.Serializable

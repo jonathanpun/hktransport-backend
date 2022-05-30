@@ -8,6 +8,8 @@ plugins {
 	kotlin("plugin.spring") version "1.6.21"
 	kotlin("plugin.serialization") version "1.6.10"
 	kotlin("plugin.allopen") version "1.4.32"
+	id ("org.jetbrains.kotlin.plugin.jpa") version "1.6.21"
+
 }
 
 noArg {
