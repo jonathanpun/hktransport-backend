@@ -1,10 +1,12 @@
 package com.jonathanpun.hktransport
+import com.jonathanpun.hktransport.db.RouteRepository
 import com.jonathanpun.hktransport.db.StopsRepository
 import com.jonathanpun.hktransport.repository.KMBRoute
 import com.jonathanpun.hktransport.repository.KMBRepository
 import com.jonathanpun.hktransport.repository.KMBStop
 import com.jonathanpun.hktransport.repository.KMBStopETA
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,6 +19,8 @@ class Controller{
     lateinit var repository: KMBRepository
     @Autowired
     lateinit var stopsRepository: StopsRepository
+    @Autowired
+    lateinit var routeRepository: RouteRepository
     @GetMapping("/")
      suspend fun get(): List<KMBRoute>? {
         return repository.getAllRoute()
@@ -34,5 +38,9 @@ class Controller{
     @GetMapping("/stop/{stopId}")
     suspend fun getStop(@PathVariable("stopId") stopId: String): KMBStop{
         return stopsRepository.getById(stopId)
+    }
+    @GetMapping("/routes")
+    suspend fun searchRoutes(@RequestParam(name = "q") query:String,@RequestParam(name = "limit") limit:Int?):List<KMBRoute>{
+        return routeRepository.findByRouteContaining(query,if (limit==null) Pageable.unpaged() else Pageable.ofSize(limit))
     }
 }
