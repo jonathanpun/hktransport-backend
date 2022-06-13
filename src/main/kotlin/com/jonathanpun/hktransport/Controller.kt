@@ -43,4 +43,13 @@ class Controller{
     suspend fun searchRoutes(@RequestParam(name = "q") query:String,@RequestParam(name = "limit") limit:Int?):List<KMBRoute>{
         return routeRepository.findByRouteContaining(query,if (limit==null) Pageable.unpaged() else Pageable.ofSize(limit))
     }
+
+    @GetMapping("/routes/{routeId}/{bound}")
+    suspend fun getRouteWithBound(@PathVariable(name= "routeId") routeId:String,@PathVariable(name = "bound") bound:String):List<KMBRoute>{
+        return routeRepository.findByRouteAndBound(routeId,bound)
+    }
+    @GetMapping("/routes/{routeId}/{bound}/{serviceType}")
+    suspend fun getRouteWithBoundAndServiceType(@PathVariable(name= "routeId") routeId:String,@PathVariable(name = "bound") bound:String,@PathVariable(name ="serviceType")serviceType:String):KMBRoute{
+        return routeRepository.findByRouteAndBoundAndServiceType(routeId,bound,serviceType)
+    }
 }

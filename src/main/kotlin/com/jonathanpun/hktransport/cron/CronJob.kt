@@ -1,6 +1,7 @@
 package com.jonathanpun.hktransport.cron
 
 import com.jonathanpun.hktransport.db.RouteRepository
+import com.jonathanpun.hktransport.db.RouteStopsRepository
 import com.jonathanpun.hktransport.db.StopsRepository
 import com.jonathanpun.hktransport.repository.KMBRepository
 import kotlinx.coroutines.GlobalScope
@@ -17,6 +18,8 @@ class CronJob:CommandLineRunner {
     lateinit var stopsRepository: StopsRepository
     @Autowired
     lateinit var routeRepository: RouteRepository
+    @Autowired
+    lateinit var routeStopRepository: RouteStopsRepository
     override fun run(vararg args: String?) {
         print("args:${args.joinToString()}")
         if(args.firstOrNull()!="cron")
@@ -26,6 +29,8 @@ class CronJob:CommandLineRunner {
             stopsRepository.saveAll(stops)
             val route = kmbRepository.getAllRoute()!!
             routeRepository.saveAll(route)
+            val routeStops = kmbRepository.getAllRouteStops()!!
+            routeStopRepository.saveAll(routeStops)
             System.exit(0)
         }
 

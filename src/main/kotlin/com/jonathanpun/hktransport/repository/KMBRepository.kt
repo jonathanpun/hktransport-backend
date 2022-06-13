@@ -31,4 +31,11 @@ class KMBRepository {
             .retrieve()
             .awaitBodyOrNull<KMBGenericResponse<KMBStopETA>>()?.data
     }
+
+    suspend fun getAllRouteStops():List<KMBRouteStop>?{
+        return webClient.get().uri("/v1/transport/kmb/route-stop")
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .awaitBodyOrNull<KMBGenericResponse<KMBRouteStop>>()?.data
+    }
 }
