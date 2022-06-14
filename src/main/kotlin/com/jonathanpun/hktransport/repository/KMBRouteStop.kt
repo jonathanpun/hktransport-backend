@@ -12,7 +12,7 @@ import javax.persistence.Table
 @Entity
 @Table(name = "route_stops")
 @Serializable
-@IdClass(KMBRouteId::class)
+@IdClass(KMBRouteStopId::class)
 data class KMBRouteStop(
     @Id
     @Column(name = "bound")
@@ -25,7 +25,7 @@ data class KMBRouteStop(
     @Id
     @Column(name = "seq")
     @SerialName("seq")
-    val seq: String,
+    val seq: Int,
     @Column(name = "serviceType")
     @SerialName("service_type")
     @Id
@@ -39,6 +39,6 @@ data class KMBRouteStop(
 data class KMBRouteStopId(
     val bound:String,
     val route:String,
-    val seq:String,
+    val seq:Int,
     val serviceType: String
 ):java.io.Serializable

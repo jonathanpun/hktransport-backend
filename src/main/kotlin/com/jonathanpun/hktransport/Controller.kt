@@ -1,16 +1,15 @@
 package com.jonathanpun.hktransport
 import com.jonathanpun.hktransport.db.RouteRepository
+import com.jonathanpun.hktransport.db.RouteStopsRepository
 import com.jonathanpun.hktransport.db.StopsRepository
-import com.jonathanpun.hktransport.repository.KMBRoute
-import com.jonathanpun.hktransport.repository.KMBRepository
-import com.jonathanpun.hktransport.repository.KMBStop
-import com.jonathanpun.hktransport.repository.KMBStopETA
+import com.jonathanpun.hktransport.repository.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
+import javax.xml.bind.JAXBElement.GlobalScope
 
 
 @RestController
@@ -21,6 +20,8 @@ class Controller{
     lateinit var stopsRepository: StopsRepository
     @Autowired
     lateinit var routeRepository: RouteRepository
+    @Autowired
+    lateinit var routeStopsRepository: RouteStopsRepository
     @GetMapping("/")
      suspend fun get(): List<KMBRoute>? {
         return repository.getAllRoute()
@@ -51,5 +52,12 @@ class Controller{
     @GetMapping("/routes/{routeId}/{bound}/{serviceType}")
     suspend fun getRouteWithBoundAndServiceType(@PathVariable(name= "routeId") routeId:String,@PathVariable(name = "bound") bound:String,@PathVariable(name ="serviceType")serviceType:String):KMBRoute{
         return routeRepository.findByRouteAndBoundAndServiceType(routeId,bound,serviceType)
+    }
+
+    @GetMapping("/route-stops/{route}/{bound}/{serviceType}")
+    suspend fun getRouteStop(@PathVariable(name = "route") route:String,@PathVariable(name = "bound") bound:String,@PathVariable(name ="serviceType")serviceType:String):List<KMBStop>{
+        return routeStopsRepository.findByRouteAndBoundAndServiceType(route, bound, serviceType).sortedBy { it.seq }.map {
+            stopsRepository.getById(it.stop)
+        }
     }
 }
