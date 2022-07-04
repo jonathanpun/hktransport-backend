@@ -43,6 +43,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("com.vladmihalcea:hibernate-types-52:2.16.2")
+	// https://mvnrepository.com/artifact/org.locationtech.proj4j/proj4j
+	implementation("org.locationtech.proj4j:proj4j:1.1.5")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")

@@ -4,7 +4,9 @@ import com.jonathanpun.hktransport.db.RouteStopsRepository
 import com.jonathanpun.hktransport.db.StopsRepository
 import com.jonathanpun.hktransport.repository.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.data.domain.Pageable
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -59,5 +61,9 @@ class Controller{
         return routeStopsRepository.findByRouteAndBoundAndServiceType(route, bound, serviceType).sortedBy { it.seq }.map {
             stopsRepository.getById(it.stop)
         }
+    }
+    @GetMapping("/route-eta/{route}/{serviceType}")
+    suspend fun getRouteEta(@PathVariable(name = "route") route:String,@PathVariable(name ="serviceType")serviceType:String): List<KMBStopETA>? {
+        return repository.getRouteEta(route, serviceType)
     }
 }
