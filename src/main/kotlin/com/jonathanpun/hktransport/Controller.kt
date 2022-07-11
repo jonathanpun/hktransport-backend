@@ -34,9 +34,9 @@ class Controller{
     }
 
     @GetMapping("/stops")
-    suspend fun  searchStop(@RequestParam(name = "q") query:String): List<KMBStop> {
+    suspend fun  searchStop(@RequestParam(name = "q") query:String,@RequestParam("limit")limit: Int?): List<KMBStop> {
         println("-------------param---------------" + query)
-       return stopsRepository.findByNameEnContainingOrNameScContainingOrNameTcContaining(query,query,query)
+       return stopsRepository.findByNameEnContainingOrNameScContainingOrNameTcContaining(query,query,query,Pageable.ofSize(limit?:10))
     }
     @GetMapping("/stop/{stopId}")
     suspend fun getStop(@PathVariable("stopId") stopId: String): KMBStop{
