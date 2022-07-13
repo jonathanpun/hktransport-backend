@@ -2,18 +2,15 @@ package com.jonathanpun.hktransport
 import com.jonathanpun.hktransport.db.RouteRepository
 import com.jonathanpun.hktransport.db.RouteStopsRepository
 import com.jonathanpun.hktransport.db.StopsRepository
-import com.jonathanpun.hktransport.model.RouteSuggestionModel
+import com.jonathanpun.hktransport.solver.RouteSuggestionModel
 import com.jonathanpun.hktransport.repository.*
 import kotlinx.serialization.Serializable
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.data.domain.Pageable
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
-import javax.xml.bind.JAXBElement.GlobalScope
 
 
 @RestController

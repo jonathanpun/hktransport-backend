@@ -2,17 +2,16 @@ package com.jonathanpun.hktransport.cron
 
 import com.jonathanpun.hktransport.db.RouteRepository
 import com.jonathanpun.hktransport.db.RouteStopsRepository
+import com.jonathanpun.hktransport.db.StopTextSearchRepository
 import com.jonathanpun.hktransport.db.StopsRepository
-import com.jonathanpun.hktransport.model.RouteSuggestionModel
+import com.jonathanpun.hktransport.solver.RouteSuggestionModel
 import com.jonathanpun.hktransport.repository.KMBRouteStop
 import com.jonathanpun.hktransport.repository.KMBStop
+import com.jonathanpun.hktransport.repository.StopTextSearch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Component
 @Order(2)
@@ -29,12 +28,21 @@ class Graph : CommandLineRunner {
     @Autowired
     lateinit var routeSuggestionModel :RouteSuggestionModel
 
+    @Autowired
+    lateinit var stopTextSearchRepository: StopTextSearchRepository
     override fun run(vararg args: String?) {
         if (args.isNotEmpty())
             return
         val stops = stopsRepository.findAll().toTypedArray()
         val routeStops = routeStopRepository.findAll().toTypedArray()
         routeSuggestionModel.init(stops,routeStops)
+//        val map = mutableMapOf<String,MutableList<KMBStop>>()
+//        for (stop in stops){
+//            map.getOrPut(stop.nameTc) { mutableListOf<KMBStop>() }.add(stop)
+//        }
+//        map.forEach { t, u ->
+//            stopTextSearchRepository.save(StopTextSearch(nameEn = u.first().nameEn, nameSc = u.first().nameSc, nameTc = u.first().nameTc, stops = u.map { it.stop },id=null))
+//        }
     }
 
 

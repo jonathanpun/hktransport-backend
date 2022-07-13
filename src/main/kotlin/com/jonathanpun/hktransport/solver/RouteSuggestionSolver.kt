@@ -1,13 +1,9 @@
-package com.jonathanpun.hktransport.model
+package com.jonathanpun.hktransport.solver
 
 import com.jonathanpun.hktransport.meters
-import com.jonathanpun.hktransport.repository.KMBRoute
 import com.jonathanpun.hktransport.repository.KMBRouteStop
 import com.jonathanpun.hktransport.repository.KMBStop
 import org.springframework.stereotype.Component
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Component
 class RouteSuggestionModel {
