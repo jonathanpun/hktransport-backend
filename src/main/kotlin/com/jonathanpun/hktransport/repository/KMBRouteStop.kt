@@ -2,6 +2,7 @@ package com.jonathanpun.hktransport.repository
 import kotlinx.serialization.Serializable
 
 import kotlinx.serialization.SerialName
+import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.Entity
@@ -32,7 +33,15 @@ data class KMBRouteStop(
     val serviceType: String,
     @Column(name = "stop")
     @SerialName("stop")
-    val stop: String
+    val stop: String,
+    @SerialName("line_geometry")
+    @Type(type = "json")
+    @Column(name = "line_geometry", columnDefinition = "json")
+    @Serializable(with = RawJsonSerializer::class)
+    val lineGeometry:String? = null,
+    @SerialName("distance")
+    @Column(name = "distance")
+    val distance:Int? = null
 )
 
 @Embeddable
