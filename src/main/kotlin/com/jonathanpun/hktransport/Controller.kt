@@ -2,7 +2,9 @@ package com.jonathanpun.hktransport
 import com.jonathanpun.hktransport.db.RouteRepository
 import com.jonathanpun.hktransport.db.RouteStopsRepository
 import com.jonathanpun.hktransport.db.StopsRepository
+import com.jonathanpun.hktransport.model.RouteSuggestionModel
 import com.jonathanpun.hktransport.repository.*
+import kotlinx.serialization.Serializable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.data.domain.Pageable
@@ -24,6 +26,8 @@ class Controller{
     lateinit var routeRepository: RouteRepository
     @Autowired
     lateinit var routeStopsRepository: RouteStopsRepository
+    @Autowired
+    lateinit var routeSuggestionModel: RouteSuggestionModel
     @GetMapping("/")
      suspend fun get(): List<KMBRoute>? {
         return repository.getAllRoute()
@@ -66,4 +70,43 @@ class Controller{
     suspend fun getRouteEta(@PathVariable(name = "route") route:String,@PathVariable(name ="serviceType")serviceType:String): List<KMBStopETA>? {
         return repository.getRouteEta(route, serviceType)
     }
+
+    @GetMapping("/route-query")
+    suspend fun getRoute(@RequestParam("sourceStop")sourceStop:String, @RequestParam("destStop")destStop:String): ResponseModel? {
+        val path =  routeSuggestionModel.dfs(sourceStop, destStop)
+        if (path==null)
+            return null
+        else{
+            val responseRouteStops = mutableListOf<ResponseModel.RouteStop>()
+            path.pathList.map {
+                val route = routeRepository.getById(KMBRouteId(it.route,it.bound,it.serviceType))
+                val routeStops = routeStopsRepository.findByRouteAndBoundAndServiceType(it.route,it.bound,it.serviceType).sortedBy { it.seq }
+                val stopIds= mutableListOf<String>()
+                val iterator = routeStops.iterator()
+                var stop:KMBRouteStop
+                do {
+                    stop = iterator.next()
+                }while (stop.stop!=it.startStop)
+                do {
+                    stopIds.add(stop.stop)
+                    stop = iterator.next()
+                }while (stop.stop!= it.endStop)
+                stopIds.add(it.endStop)
+                responseRouteStops.add(
+                    ResponseModel.RouteStop(
+                    route,
+                    stopIds.map {
+                        stopsRepository.getById(it)
+                    }
+                ))
+            }
+            return ResponseModel(responseRouteStops)
+        }
+    }
+}
+
+@Serializable
+data class ResponseModel(val routeStops:List<RouteStop>){
+    @Serializable
+    data class RouteStop(val route: KMBRoute,val stops:List<KMBStop>)
 }
