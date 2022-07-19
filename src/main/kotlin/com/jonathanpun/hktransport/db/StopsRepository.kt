@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component
 @Component
 interface StopsRepository:JpaRepository<KMBStop,String> {
     fun findByNameEnContainingOrNameScContainingOrNameTcContaining(nameEn:String,nameSc:String,nameTc:String,pageable: Pageable):List<KMBStop>
+    fun findByLatBetweenAndLongBetween(fromLat:Double,toLat:Double,fromLng:Double,toLng:Double):List<KMBStop>
 }

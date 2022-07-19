@@ -4,6 +4,7 @@ import com.jonathanpun.hktransport.meters
 import com.jonathanpun.hktransport.repository.KMBRouteStop
 import com.jonathanpun.hktransport.repository.KMBStop
 import org.springframework.stereotype.Component
+import kotlin.math.min
 
 @Component
 class RouteSuggestionModel {
@@ -44,13 +45,17 @@ class RouteSuggestionModel {
             nearStopHastMap[current.stop] = list
         }
     }
-    fun dfs(sourceStop:String,destStop:String): DfsPath? {
+    fun dfs(sourceStop:String,destStop:String,maxRoute:Int): List<DfsPath>? {
         val targetNearSet = nearStopHastMap[destStop]
         val reachedSet = mutableSetOf<String>()
         val queue = ArrayDeque<DfsPath>()
         queue.add(DfsPath(sourceStop, emptyList()))
+        var minRoute = Int.MAX_VALUE
+        val ans = mutableListOf<DfsPath>()
         while (queue.size>0){
             val currentStop = queue.removeFirst()
+            if (currentStop.pathList.size==min(maxRoute,minRoute))
+                continue
             //all the route that reach from the current stop
             val availableRouteList = stopHashMap[currentStop.stop]!!.map {
                 val routeList = routeHashMap[it.first]!!
@@ -59,16 +64,21 @@ class RouteSuggestionModel {
             val nexStops = availableRouteList.flatten().map {routeStops->SearchNode("route:${routeStops.route}-bound${routeStops.bound}-serviceType${routeStops.serviceType}",routeStops.route,routeStops.serviceType,routeStops.bound,
                 currentStop.stop,routeStops.stop
             ) }
-            val unreachedStop = nexStops.filter { !reachedSet.contains(it.id) }.map { DfsPath(it.endStop,currentStop.pathList.toMutableList().apply{  add(it) }) }
-            val target = unreachedStop.find { targetNearSet!!.contains(it.stop)  }
-            if (target!= null){
-                queue.clear()
-                return target
+            for (nextStop in nexStops){
+                val dfsPath = DfsPath(nextStop.endStop,currentStop.pathList.toMutableList().apply{  add(nextStop) })
+                if (reachedSet.contains(dfsPath.stop))
+                    continue
+                if (dfsPath.stop == destStop){
+                    ans.add(dfsPath)
+                    minRoute = min(minRoute,dfsPath.pathList.size)
+                }
+                else{
+                    reachedSet.add(dfsPath.stop)
+                    queue.add(dfsPath)
+                }
             }
-            queue.addAll(unreachedStop)
-            reachedSet.addAll(unreachedStop.map { it.stop })
         }
-        return null
+        return ans
     }
 
 
