@@ -41,7 +41,10 @@ data class KMBRouteStop(
     val lineGeometry:String? = null,
     @SerialName("distance")
     @Column(name = "distance")
-    val distance:Int? = null
+    val distance:Int? = null,
+    @SerialName("fare")
+    @Column(name = "fare")
+    val fare:Double? = null
 )
 
 @Embeddable

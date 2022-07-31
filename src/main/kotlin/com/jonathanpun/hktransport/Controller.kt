@@ -6,6 +6,8 @@ import com.jonathanpun.hktransport.db.StopsRepository
 import com.jonathanpun.hktransport.solver.RouteSuggestionModel
 import com.jonathanpun.hktransport.repository.*
 import com.jonathanpun.hktransport.solver.DfsPath
+import com.jonathanpun.hktransport.solver.SearchNode
+import kotlinx.coroutines.selects.select
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -90,52 +92,72 @@ class Controller{
     suspend fun getRoute(@RequestParam("sourceStop")sourceStopGroupId:Int, @RequestParam("destStop")destStopGroupId:Int): List<ResponseModel>? {
         val sourceStops =  stopTextSearchRepository.getById(sourceStopGroupId).stops
         val destStops = stopTextSearchRepository.getById(destStopGroupId).stops
-        val dfsPath = mutableListOf<DfsPath>()
         val max = 2
-        for (sourceStop in sourceStops){
-            for(destStop in destStops){
-                val dfs = routeSuggestionModel.dfs(sourceStop,destStop,max)?:continue
-                dfsPath.addAll(dfs)
-            }
-        }
-        dfsPath.sortBy { it.pathList.size }
-        return dfsPath.take(3).map {
+        val dfs = routeSuggestionModel.dfs(sourceStops,destStops,max)
+        dfs?.sortedWith(compareBy<DfsPath> { it.pathList.size }.thenBy { it.busFare })
+        return dfs?.take(5)?.map {
             val responseRouteStops = mutableListOf<ResponseModel.RouteStop>()
+            var totalFare:Double? = 0.0
             it.pathList.map {
-                val route = routeRepository.getById(KMBRouteId(it.route,it.bound,it.serviceType))
-                val routeStops = routeStopsRepository.findByRouteAndBoundAndServiceType(it.route,it.bound,it.serviceType).sortedBy { it.seq }
-                val stopIds= mutableListOf<String>()
-                val iterator = routeStops.iterator()
-                val pathList = mutableListOf<List<Double>>()
-                var stop:KMBRouteStop
-                do {
-                    stop = iterator.next()
-                }while (stop.stop!=it.startStop)
-                do {
-                    stopIds.add(stop.stop)
-                    try {
-                        pathList.addAll(Json.decodeFromString<List<List<Double>>>(serializer(),stop.lineGeometry.orEmpty()))
-                    }catch (e:Exception){
-                        e.printStackTrace()
+                when(it){
+                    is SearchNode.RouteSearchNode -> {
+                        val route = routeRepository.getById(KMBRouteId(it.route,it.bound,it.serviceType))
+                        val routeStops = routeStopsRepository.findByRouteAndBoundAndServiceType(it.route,it.bound,it.serviceType).sortedBy { it.seq }
+                        val stopIds= mutableListOf<String>()
+                        val iterator = routeStops.iterator()
+                        val pathList = mutableListOf<List<Double>>()
+                        var stop:KMBRouteStop
+                        do {
+                            stop = iterator.next()
+                        }while (stop.stop!=it.startStop)
+                        do {
+                            stopIds.add(stop.stop)
+                            try {
+                                pathList.addAll(Json.decodeFromString<List<List<Double>>>(serializer(),stop.lineGeometry.orEmpty()))
+                            }catch (e:Exception){
+                                e.printStackTrace()
+                            }
+                            stop = iterator.next()
+                        }while (stop.stop!= it.endStop)
+                        stopIds.add(it.endStop)
+                        try {
+                            pathList.addAll(Json.decodeFromString<List<List<Double>>>(serializer(),stop.lineGeometry.orEmpty()))
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+                        val stops =stopIds.map {
+                            stopsRepository.getById(it)
+                        }
+                        responseRouteStops.add(
+                            ResponseModel.RouteStop(
+                                "ROUTE",
+                                route,
+                                stops,
+                                pathList,
+                                stops.first(),
+                                stops.last(),
+                                stop.fare
+                            ))
+                        totalFare=totalFare?.let {
+                            val fare = stop.fare
+                            if (fare!=null)
+                                it+fare
+                            else
+                                null
+                        }
                     }
-                    stop = iterator.next()
-                }while (stop.stop!= it.endStop)
-                stopIds.add(it.endStop)
-                try {
-                    pathList.addAll(Json.decodeFromString<List<List<Double>>>(serializer(),stop.lineGeometry.orEmpty()))
-                }catch (e:Exception){
-                    e.printStackTrace()
+                    is SearchNode.WalkSearchNode -> {
+                        responseRouteStops.add(ResponseModel.RouteStop("WALK",null,
+                            null,
+                            null,
+                        stopsRepository.getById(it.startStop),
+                        stopsRepository.getById(it.endStop),
+                        null))
+                    }
                 }
-                responseRouteStops.add(
-                    ResponseModel.RouteStop(
-                    route,
-                    stopIds.map {
-                        stopsRepository.getById(it)
-                    },
-                        pathList
-                ))
+
             }
-            ResponseModel(responseRouteStops)
+            ResponseModel(responseRouteStops,totalFare)
         }
 
 
@@ -149,7 +171,7 @@ class Controller{
 }
 
 @Serializable
-data class ResponseModel(val routeStops:List<RouteStop>){
+data class ResponseModel(val routeStops:List<RouteStop>,val totalFare:Double?){
     @Serializable
-    data class RouteStop(val route: KMBRoute,val stops:List<KMBStop>,val pathList:List<List<Double>>)
+    data class RouteStop(val type:String,val route: KMBRoute?,val stops:List<KMBStop>?,val pathList:List<List<Double>>?,val fromStop:KMBStop,val toStop:KMBStop,val fare:Double?)
 }
